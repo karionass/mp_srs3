@@ -1,0 +1,6 @@
+Machine Learning -> Машинное обучение
+Neural Networks -> Нейронные сети
+Backpropagation -> Обратное распространение ошибки
+Data Science -> Наука о данных
+Inference -> Логический вывод (инференс)
+Feature Engineering -> Разработка признаков
