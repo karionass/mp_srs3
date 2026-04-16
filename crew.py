@@ -1,9 +1,7 @@
-import os
 from dotenv import load_dotenv
 from crewai import Agent, Crew, Process, Task, Knowledge
 from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import FileReadTool, SerperDevTool
-from tools import AcademicConsistencyTool 
 from tools import YouTubeTranscriptTool, AcademicConsistencyTool
 
 load_dotenv()
@@ -11,7 +9,6 @@ load_dotenv()
 @CrewBase
 class VideoLocalizationCrew():
     """Система локализации учебного видеоконтента (Вариант 11)"""
-
     def __init__(self, inputs=None) -> None:
         self.llm = "gemini/gemini-2.5-flash-lite"
         self.inputs = inputs if inputs is not None else {}
@@ -35,7 +32,7 @@ class VideoLocalizationCrew():
             goal=self.inputs.get('goal2', 'Найти перевод для отсутствующих в глоссарии слов'),
             backstory=self.inputs.get('back2', 'Специалист по поиску терминологии...'),
             llm=self.llm,
-            tools=[SerperDevTool()], # Концепция: Tools
+            tools=[SerperDevTool()],
             verbose=True
         )
 
@@ -46,7 +43,7 @@ class VideoLocalizationCrew():
             goal=self.inputs.get('goal3', 'Создать академическое резюме на русском'),
             backstory=self.inputs.get('back3', 'Мастер локализации образовательного контента...'),
             llm=self.llm,
-            tools=[AcademicConsistencyTool()], # Концепция: Custom Tool
+            tools=[AcademicConsistencyTool()],
             allow_delegation=True,
             verbose=True
         )
@@ -61,7 +58,6 @@ class VideoLocalizationCrew():
 
     @task
     def clarification_task(self) -> Task:
-        # Концепция: Conditional Task (по логике СРС срабатывает при нехватке данных в Knowledge)
         return Task(
             description="Проверь термины. Если их нет в Knowledge Base, найди их перевод в сети.",
             expected_output="Уточненный список терминов с переводами.",

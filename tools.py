@@ -40,4 +40,4 @@ class AcademicConsistencyTool(BaseTool):
         found = [w for w in forbidden_words if w in text.lower()]
         if found:
             return f"Найдены неакадемические выражения: {', '.join(found)}. Исправьте их."
-        return "✅ Текст соответствует академическому стилю."
+        return "Текст соответствует академическому стилю."

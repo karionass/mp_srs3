@@ -6,7 +6,7 @@ from crew import VideoLocalizationCrew
 load_dotenv()
 
 st.set_page_config(page_title="Localization AI", layout="wide")
-st.title("Ассистент локализации учебного контента")
+st.title("Ассистент локализации учебного видеоконтента")
 
 st.header("Конфигурация агентов и задач")
 col_a, col_b, col_c = st.columns(3)
@@ -19,14 +19,14 @@ with col_a:
 
 with col_b:
     st.subheader("Редактор")
-    role_2 = st.text_input("Role", "Редактор спорных терминов", key="r2")
+    role_2 = st.text_input("Role", "Редактор терминов", key="r2")
     goal_2 = st.text_area("Goal", "Найти перевод для новых слов", key="g2")
     back_2 = st.text_area("Backstory", "Специалист по поиску терминологии...", key="b2")
 
 with col_c:
     st.subheader("Переводчик")
     role_3 = st.text_input("Role", "Лингвист-переводчик", key="r3")
-    goal_3 = st.text_area("Goal", "Создать summary на русском", key="g3")
+    goal_3 = st.text_area("Goal", "Создать академическое резюме на русском", key="g3")
     back_3 = st.text_area("Backstory", "Мастер академической локализации...", key="b3")
 
 st.divider()
@@ -43,7 +43,7 @@ with col_in1:
     if source_type == "Файл":
         uploaded_file = st.file_uploader("Загрузить TXT/PDF", type=['txt', 'pdf'])
     else:
-        video_url = st.text_input("Вставьте ссылку (например, https://www.youtube.com/watch?v=...)")
+        video_url = st.text_input("Вставьте ссылку (https://www.youtube.com/watch?v=...)")
 
 with col_in2:
     st.subheader("Knowledge Source")
@@ -64,10 +64,10 @@ if st.button("ЗАПУСК", use_container_width=True):
             'video_url': video_url
         }
 
-        with st.status("Работа агентов...", expanded=True) as status:
+        with st.status("В процессе", expanded=True) as status:
             crew_instance = VideoLocalizationCrew(inputs=config_data)
             result = crew_instance.crew().kickoff(inputs=config_data)
-            status.update(label="Локализация завершена!", state="complete")
+            status.update(label="Локализация завершена", state="complete")
 
         st.subheader("Итоговое резюме:")
         st.markdown(result.raw)
