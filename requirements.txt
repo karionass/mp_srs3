@@ -1,5 +1,6 @@
-crewai
-crewai-tools
+crewai[tools]
 streamlit
 python-dotenv
-langchain-google-genai
+youtube-transcript-api
+litellm
+google-generativeai
