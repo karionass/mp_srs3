@@ -9,6 +9,7 @@ load_dotenv()
 @CrewBase
 class VideoLocalizationCrew():
     """Система локализации учебного видеоконтента (Вариант 11)"""
+
     def __init__(self, inputs=None) -> None:
         self.llm = "gemini/gemini-2.5-flash-lite"
         self.inputs = inputs if inputs is not None else {}
@@ -20,7 +21,7 @@ class VideoLocalizationCrew():
             role=self.inputs.get('role1'),
             goal=self.inputs.get('goal1'),
             backstory=self.inputs.get('back1'),
-            tools=[FileReadTool(), YouTubeTranscriptTool()], 
+            tools=[FileReadTool(), YouTubeTranscriptTool()],
             llm=self.llm,
             verbose=True
         )
@@ -50,17 +51,37 @@ class VideoLocalizationCrew():
 
     @task
     def analysis_task(self) -> Task:
+        file_name = self.inputs.get('file_name', '')
+        video_url = self.inputs.get('video_url', '')
+
+        if video_url:
+            description = (
+                f"Вызови инструмент YouTubeTranscriptTool с аргументом video_url='{video_url}'. "
+                "Это единственный источник данных — не жди другого ввода. "
+                "После получения текста выдели 3-5 основных тем и 7-10 ключевых терминов на английском."
+            )
+        else:
+            description = (
+                f"Вызови инструмент FileReadTool с аргументом file_path='{file_name}'. "
+                "Это единственный источник данных — не жди другого ввода. "
+                "После получения текста выдели 3-5 основных тем и 7-10 ключевых терминов на английском."
+            )
+
         return Task(
-            description=f"Проанализируй файл {self.inputs.get('file_name')}. Выдели структуру и 5-7 терминов.",
-            expected_output="План лекции и список извлеченных терминов.",
+            description=description,
+            expected_output="Структурированный план лекции и список извлеченных терминов.",
             agent=self.terminologist()
         )
 
     @task
     def clarification_task(self) -> Task:
         return Task(
-            description="Проверь термины. Если их нет в Knowledge Base, найди их перевод в сети.",
-            expected_output="Уточненный список терминов с переводами.",
+            description=(
+                "Проверь извлечённые термины по базе знаний (Knowledge). "
+                "Если термин отсутствует в глоссарии или имеет несколько значений, "
+                "найди наиболее подходящий вариант через поиск в интернете."
+            ),
+            expected_output="Таблица: [Термин] -> [Рекомендуемый перевод] -> [Обоснование].",
             agent=self.clarification_agent(),
             context=[self.analysis_task()]
         )
@@ -68,11 +89,14 @@ class VideoLocalizationCrew():
     @task
     def final_translation_task(self) -> Task:
         return Task(
-            description="Напиши итоговое резюме лекции на русском языке в формате Markdown.",
-            expected_output="Готовое локализованное учебное резюме.",
+            description=(
+                "На основе полученного плана и проверенных терминов составь итоговое "
+                "учебное резюме (summary) на русском языке в формате Markdown. "
+                "Убедись, что все термины соответствуют академическому стилю."
+            ),
+            expected_output="Готовое учебное резюме в формате Markdown.",
             agent=self.translator(),
             context=[self.analysis_task(), self.clarification_task()],
-            human_input=True 
         )
 
     @crew
@@ -87,6 +111,7 @@ class VideoLocalizationCrew():
             tasks=self.tasks,
             process=Process.sequential,
             knowledge=glossary_source,
-            memory=True, 
-            verbose=True
+            memory=True,
+            verbose=True,
+            max_rpm=10 
         )
