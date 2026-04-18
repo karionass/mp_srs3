@@ -171,25 +171,25 @@ class VideoLocalizationCrew():
             context=[self.analysis_task(), self.clarification_task(), self.conditional_resolution_task()],
         )
 
-    @task
-    def hitl_review_task(self) -> Task:
-        """Этап 4 (HITL): Финальная вычитка с участием человека."""
-        return Task(
-            description=(
-                "ФИНАЛЬНАЯ ПРОВЕРКА (Human-in-the-Loop). Выведи подготовленное резюме и запроси подтверждение от пользователя.Если пользователь указал правки — внеси их. Если одобрил — зафиксируй как финальное."
-                "Это обязательный этап: локализация учебного контента требует экспертного подтверждения перед публикацией."
-            ),
-            expected_output="Финальный, утверждённый пользователем текст локализации в формате Markdown.",
-            agent=self.translator(),
-            context=[self.final_translation_task()],
-            human_input=True 
-        )
+    # @task
+    # def hitl_review_task(self) -> Task:
+    #     """Этап 4 (HITL): Финальная вычитка с участием человека."""
+    #     return Task(
+    #         description=(
+    #             "ФИНАЛЬНАЯ ПРОВЕРКА (Human-in-the-Loop). Выведи подготовленное резюме и запроси подтверждение от пользователя.Если пользователь указал правки — внеси их. Если одобрил — зафиксируй как финальное."
+    #             "Это обязательный этап: локализация учебного контента требует экспертного подтверждения перед публикацией."
+    #         ),
+    #         expected_output="Финальный, утверждённый пользователем текст локализации в формате Markdown.",
+    #         agent=self.translator(),
+    #         context=[self.final_translation_task()],
+    #         human_input=True 
+    #     )
 
     @crew
     def crew(self) -> Crew:
         glossary_source = Knowledge(
             sources=["knowledge/glossary.txt"],
-            collection_name="academic_glossary"
+            collection_name="academic_glossary" 
         )
 
         return Crew(

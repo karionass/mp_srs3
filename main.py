@@ -86,6 +86,11 @@ with st.container():
 has_file = uploaded_file is not None
 has_url = bool(video_url.strip())
 
+if "crew_result" not in st.session_state:
+    st.session_state.crew_result = None
+if "final_confirmed" not in st.session_state:
+    st.session_state.final_confirmed = False
+
 if run_button:
     if not has_file and not has_url:
         st.error("Пожалуйста, укажите источник лекции: загрузите файл или введите YouTube ссылку.")
@@ -113,26 +118,45 @@ if run_button:
             st.info(f"Режим: Файл → {uploaded_file.name}")
 
         with st.status("Работа мультиагентной системы...", expanded=True) as status:
-            st.write("Аналитик извлекает структуру и термины...")
-            
             try:
                 crew_instance = VideoLocalizationCrew(inputs=config_data)
                 result = crew_instance.crew().kickoff(inputs=config_data)
                 
-                status.update(label="Локализация завершена", state="complete")
+                st.session_state.crew_result = result.raw
+                st.session_state.final_confirmed = False
+                status.update(label="Черновик готов! Требуется проверка.", state="complete")
                 
             except Exception as e:
-                status.update(label="Ошибка выполнения", state="error")
                 st.error(f"Ошибка: {str(e)}")
                 st.stop()
 
-        st.subheader("Итоговое резюме")
-        st.markdown(result.raw)
+if st.session_state.crew_result:
+    st.divider()
+    st.subheader("Проверка и правка резюме (HITL)")
+    
+    edited_result = st.text_area(
+        "Вы можете внести правки перед финальным сохранением:",
+        value=st.session_state.crew_result,
+        height=400,
+        key="hitl_editor"
+    )
 
+    col_confirm, col_reset = st.columns([1, 4])
+    
+    with col_confirm:
+        if st.button("Подтвердить", type="primary"):
+            st.session_state.crew_result = edited_result
+            st.session_state.final_confirmed = True
+            st.success("Резюме утверждено")
+
+    if st.session_state.final_confirmed:
+        st.info("Финальная версия готова к скачиванию")
+        st.markdown(st.session_state.crew_result)
+        
         st.download_button(
-            label="Скачать резюме (.md)",
-            data=result.raw,
-            file_name="localization_summary.md",
+            label="Скачать финальное резюме (.md)",
+            data=st.session_state.crew_result,
+            file_name="final_localization.md",
             mime="text/markdown"
         )
 
