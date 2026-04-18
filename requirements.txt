@@ -2,5 +2,6 @@ crewai[tools]
 streamlit
 python-dotenv
 youtube-transcript-api
-litellm
+litellm>=1.52.0
+openai==1.57.0
 google-generativeai

@@ -24,7 +24,7 @@ class VideoLocalizationCrew():
     """Система локализации учебного видеоконтента (Вариант 11)"""
 
     def __init__(self, inputs=None) -> None:
-        self.llm = "gemini/gemini-2.5-flash"
+        self.llm = "gpt-4o-mini"
         self.inputs = inputs if inputs is not None else {}
 
     @agent
